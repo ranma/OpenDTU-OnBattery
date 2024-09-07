@@ -202,6 +202,8 @@ class PytesBatteryStats : public BatteryStats {
         float _dischargeVoltageLimit;
 
         uint16_t _stateOfHealth;
+        int _chargeCycles = -1;
+        int _balance = -1;
 
         float _temperature;
 
@@ -221,8 +223,9 @@ class PytesBatteryStats : public BatteryStats {
         uint8_t _moduleCountBlockingCharge;
         uint8_t _moduleCountBlockingDischarge;
 
-        uint16_t _totalCapacity;
-        uint16_t _availableCapacity;
+        float _totalCapacity;
+        float _availableCapacity;
+        uint8_t _capacityPrecision = 0; // decimal places
 
         float _chargedEnergy = -1;
         float _dischargedEnergy = -1;

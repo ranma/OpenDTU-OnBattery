@@ -138,6 +138,7 @@ void MqttHandleBatteryHassClass::loop()
             publishSensor("Current", "mdi:current-dc", "current", "current", "measurement", "A");
             publishSensor("State of Health (SOH)", "mdi:heart-plus", "stateOfHealth", NULL, "measurement", "%");
             publishSensor("Temperature", "mdi:thermometer", "temperature", "temperature", "measurement", "°C");
+            publishSensor("Charge Cycles", "mdi:counter", "chargeCycles");
 
             publishSensor("Charged Energy", NULL, "chargedEnergy", "energy", "total_increasing", "kWh");
             publishSensor("Discharged Energy", NULL, "dischargedEnergy", "energy", "total_increasing", "kWh");
@@ -183,6 +184,7 @@ void MqttHandleBatteryHassClass::loop()
             publishBinarySensor("Warning BMS internal", "mdi:alert-outline", "warning/bmsInternal", "1", "0");
             publishBinarySensor("Warning Cell Imbalance", "mdi:alert-outline", "warning/cellImbalance", "1", "0");
 
+            publishBinarySensor("Balancing Active", "mdi:scale-balance", "balancingActive", "1", "0");
             publishBinarySensor("Charge immediately", "mdi:alert", "charging/chargeImmediately", "1", "0");
             break;
 

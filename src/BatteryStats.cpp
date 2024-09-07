@@ -189,10 +189,13 @@ void PytesBatteryStats::getLiveViewData(JsonVariant& root) const
     addLiveViewValue(root, "chargeCurrentLimitation", _chargeCurrentLimit, "A", 1);
     addLiveViewValue(root, "dischargeVoltageLimitation", _dischargeVoltageLimit, "V", 1);
     addLiveViewValue(root, "stateOfHealth", _stateOfHealth, "%", 0);
+    if (_chargeCycles != -1) {
+        addLiveViewValue(root, "chargeCycles", _chargeCycles, "", 0);
+    }
     addLiveViewValue(root, "temperature", _temperature, "°C", 1);
 
-    addLiveViewValue(root, "capacity", _totalCapacity, "Ah", 0);
-    addLiveViewValue(root, "availableCapacity", _availableCapacity, "Ah", 0);
+    addLiveViewValue(root, "capacity", _totalCapacity, "Ah", _capacityPrecision);
+    addLiveViewValue(root, "availableCapacity", _availableCapacity, "Ah", _capacityPrecision);
 
     if (_chargedEnergy != -1) {
         addLiveViewValue(root, "chargedEnergy", _chargedEnergy, "kWh", 1);
@@ -202,6 +205,10 @@ void PytesBatteryStats::getLiveViewData(JsonVariant& root) const
         addLiveViewValue(root, "dischargedEnergy", _dischargedEnergy, "kWh", 1);
     }
     addLiveViewTextValue(root, "chargeImmediately", (_chargeImmediately?"yes":"no"));
+
+    if (_balance != -1) {
+        addLiveViewTextValue(root, "balancingActive", (_balance?"yes":"no"));
+    }
 
     addLiveViewInSection(root, "cells", "cellMinVoltage", static_cast<float>(_cellMinMilliVolt)/1000, "V", 3);
     addLiveViewInSection(root, "cells", "cellMaxVoltage", static_cast<float>(_cellMaxMilliVolt)/1000, "V", 3);
@@ -434,6 +441,12 @@ void PytesBatteryStats::mqttPublish() const
     MqttSettings.publish("battery/settings/dischargeVoltageLimitation", String(_dischargeVoltageLimit));
 
     MqttSettings.publish("battery/stateOfHealth", String(_stateOfHealth));
+    if (_chargeCycles != -1) {
+        MqttSettings.publish("battery/chargeCycles", String(_chargeCycles));
+    }
+    if (_balance != -1) {
+        MqttSettings.publish("battery/balancingActive", String(_balance ? 1 : 0));
+    }
     MqttSettings.publish("battery/temperature", String(_temperature));
 
     if (_chargedEnergy != -1) {
