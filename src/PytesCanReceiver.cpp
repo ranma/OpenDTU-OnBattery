@@ -145,6 +145,15 @@ void PytesCanReceiver::onMessage(twai_message_t rx_message)
             break;
         }
 
+        case 0x360: { // Charging request
+            _stats->_chargeImmediately = rx_message.data[0]; // 0xff requests charging.
+            if (_verboseLogging) {
+                MessageOutput.printf("[Pytes] chargeImmediately: %d\r\n",
+                        _stats->_chargeImmediately);
+            }
+            break;
+        }
+
         case 0x372: { // BankInfo
             _stats->_moduleCountOnline = this->readUnsignedInt16(rx_message.data);
             _stats->_moduleCountBlockingCharge = this->readUnsignedInt16(rx_message.data + 2);

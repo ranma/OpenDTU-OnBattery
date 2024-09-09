@@ -182,6 +182,8 @@ void MqttHandleBatteryHassClass::loop()
             publishBinarySensor("Warning Temperature high (charge)", "mdi:thermometer-high", "warning/highTemperatureCharge", "1", "0");
             publishBinarySensor("Warning BMS internal", "mdi:alert-outline", "warning/bmsInternal", "1", "0");
             publishBinarySensor("Warning Cell Imbalance", "mdi:alert-outline", "warning/cellImbalance", "1", "0");
+
+            publishBinarySensor("Charge immediately", "mdi:alert", "charging/chargeImmediately", "1", "0");
             break;
 
         case 5: // SBS Unipower

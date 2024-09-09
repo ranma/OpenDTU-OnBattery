@@ -183,6 +183,7 @@ class PytesBatteryStats : public BatteryStats {
     public:
         void getLiveViewData(JsonVariant& root) const final;
         void mqttPublish() const final;
+        bool getImmediateChargingRequest() const { return _chargeImmediately; };
         float getChargeCurrentLimitation() const { return _chargeCurrentLimit; };
 
     private:
@@ -247,6 +248,8 @@ class PytesBatteryStats : public BatteryStats {
         bool _warningHighTemperatureCharge;
         bool _warningInternalFailure;
         bool _warningCellImbalance;
+
+        bool _chargeImmediately;
 };
 
 class JkBmsBatteryStats : public BatteryStats {
