@@ -201,6 +201,7 @@ void PytesBatteryStats::getLiveViewData(JsonVariant& root) const
     if (_dischargedEnergy != -1) {
         addLiveViewValue(root, "dischargedEnergy", _dischargedEnergy, "kWh", 1);
     }
+    addLiveViewTextValue(root, "chargeImmediately", (_chargeImmediately?"yes":"no"));
 
     addLiveViewInSection(root, "cells", "cellMinVoltage", static_cast<float>(_cellMinMilliVolt)/1000, "V", 3);
     addLiveViewInSection(root, "cells", "cellMaxVoltage", static_cast<float>(_cellMaxMilliVolt)/1000, "V", 3);
@@ -482,6 +483,8 @@ void PytesBatteryStats::mqttPublish() const
     MqttSettings.publish("battery/warning/highTemperatureCharge", String(_warningHighTemperatureCharge));
     MqttSettings.publish("battery/warning/bmsInternal", String(_warningInternalFailure));
     MqttSettings.publish("battery/warning/cellImbalance", String(_warningCellImbalance));
+
+    MqttSettings.publish("battery/charging/chargeImmediately", String(_chargeImmediately));
 }
 
 void JkBmsBatteryStats::mqttPublish() const
