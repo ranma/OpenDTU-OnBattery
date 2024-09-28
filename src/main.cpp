@@ -8,6 +8,7 @@
 #include "InverterSettings.h"
 #include "Led_Single.h"
 #include "MessageOutput.h"
+#include "ESPLog.h"
 #include "MqttHandleDtu.h"
 #include "MqttHandleHass.h"
 #include "MqttHandleInverter.h"
@@ -51,6 +52,7 @@ void setup()
         yield();
 #endif
     MessageOutput.init(scheduler);
+    ESPLog.init(scheduler);
     MessageOutput.println();
     MessageOutput.println("Starting OpenDTU");
 
