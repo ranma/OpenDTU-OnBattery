@@ -27,6 +27,7 @@ void BatteryClass::init(Scheduler& scheduler)
     scheduler.addTask(_loopTask);
     _loopTask.setCallback(std::bind(&BatteryClass::loop, this));
     _loopTask.setIterations(TASK_FOREVER);
+    _loopTask.setInterval(1 * TASK_SECOND);
     _loopTask.enable();
 
     this->updateSettings();

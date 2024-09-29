@@ -11,7 +11,7 @@
 #include "NetworkSettings.h"
 
 SyslogLogger::SyslogLogger()
-    : _loopTask(TASK_IMMEDIATE, TASK_FOREVER, std::bind(&SyslogLogger::loop, this))
+    : _loopTask(1 * TASK_SECOND, TASK_FOREVER, std::bind(&SyslogLogger::loop, this))
 {
 }
 

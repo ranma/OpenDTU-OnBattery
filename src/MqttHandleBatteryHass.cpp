@@ -16,11 +16,13 @@ void MqttHandleBatteryHassClass::init(Scheduler& scheduler)
     scheduler.addTask(_loopTask);
     _loopTask.setCallback(std::bind(&MqttHandleBatteryHassClass::loop, this));
     _loopTask.setIterations(TASK_FOREVER);
+    _loopTask.setInterval(Configuration.get().Mqtt.PublishInterval * TASK_SECOND);
     _loopTask.enable();
 }
 
 void MqttHandleBatteryHassClass::loop()
 {
+    _loopTask.setInterval(Configuration.get().Mqtt.PublishInterval * TASK_SECOND);
     CONFIG_T& config = Configuration.get();
 
     if (!config.Battery.Enabled) { return; }

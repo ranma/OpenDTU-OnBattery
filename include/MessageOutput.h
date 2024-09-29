@@ -22,6 +22,7 @@ private:
     void loop();
 
     Task _loopTask;
+    StatusRequest _condition;
 
     using message_t = std::vector<uint8_t>;
 

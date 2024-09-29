@@ -3,6 +3,7 @@
  * Copyright (C) 2022 Thomas Basler and others
  */
 #include "MqttHandleHuawei.h"
+#include "Configuration.h"
 #include "MessageOutput.h"
 #include "MqttSettings.h"
 #include "Huawei_can.h"
@@ -16,6 +17,7 @@ void MqttHandleHuaweiClass::init(Scheduler& scheduler)
     scheduler.addTask(_loopTask);
     _loopTask.setCallback(std::bind(&MqttHandleHuaweiClass::loop, this));
     _loopTask.setIterations(TASK_FOREVER);
+    _loopTask.setInterval(Configuration.get().Mqtt.PublishInterval * TASK_SECOND);
     _loopTask.enable();
 
     subscribeTopics();
@@ -56,6 +58,7 @@ void MqttHandleHuaweiClass::unsubscribeTopics()
 
 void MqttHandleHuaweiClass::loop()
 {
+    _loopTask.setInterval(Configuration.get().Mqtt.PublishInterval * TASK_SECOND);
     const CONFIG_T& config = Configuration.get();
 
     std::unique_lock<std::mutex> mqttLock(_mqttMutex);

@@ -14,7 +14,7 @@
 #include <ETH.h>
 
 NetworkSettingsClass::NetworkSettingsClass()
-    : _loopTask(TASK_IMMEDIATE, TASK_FOREVER, std::bind(&NetworkSettingsClass::loop, this))
+    : _loopTask(10 * TASK_MILLISECOND, TASK_FOREVER, std::bind(&NetworkSettingsClass::loop, this))
     , _apIp(192, 168, 4, 1)
     , _apNetmask(255, 255, 255, 0)
 {
@@ -131,6 +131,7 @@ bool NetworkSettingsClass::onEvent(DtuNetworkEventCb cbEvent, const network_even
 
 void NetworkSettingsClass::raiseEvent(const network_event event)
 {
+    _condition.signal();
     for (auto& entry : _cbEventList) {
         if (entry.cb) {
             if (entry.event == event || entry.event == network_event::NETWORK_EVENT_MAX) {
@@ -274,6 +275,10 @@ void NetworkSettingsClass::loop()
     }
 
     handleMDNS();
+
+    _condition.setWaiting(1);
+    _loopTask.waitFor(&_condition);
+    _loopTask.setTimeout(10 * TASK_MILLISECOND);
 }
 
 void NetworkSettingsClass::applyConfig()

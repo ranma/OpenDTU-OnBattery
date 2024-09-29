@@ -16,6 +16,7 @@ void MqttHandlePowerLimiterClass::init(Scheduler& scheduler)
     scheduler.addTask(_loopTask);
     _loopTask.setCallback(std::bind(&MqttHandlePowerLimiterClass::loop, this));
     _loopTask.setIterations(TASK_FOREVER);
+    _loopTask.setInterval(Configuration.get().Mqtt.PublishInterval * TASK_SECOND);
     _loopTask.enable();
 
     using std::placeholders::_1;
@@ -63,6 +64,7 @@ void MqttHandlePowerLimiterClass::unsubscribeTopics()
 
 void MqttHandlePowerLimiterClass::loop()
 {
+    _loopTask.setInterval(Configuration.get().Mqtt.PublishInterval * TASK_SECOND);
     std::unique_lock<std::mutex> mqttLock(_mqttMutex);
 
     const CONFIG_T& config = Configuration.get();

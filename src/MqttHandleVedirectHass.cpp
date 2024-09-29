@@ -19,11 +19,13 @@ void MqttHandleVedirectHassClass::init(Scheduler& scheduler)
     scheduler.addTask(_loopTask);
     _loopTask.setCallback([this] { loop(); });
     _loopTask.setIterations(TASK_FOREVER);
+    _loopTask.setInterval(Configuration.get().Mqtt.PublishInterval * TASK_SECOND);
     _loopTask.enable();
 }
 
 void MqttHandleVedirectHassClass::loop()
 {
+    _loopTask.setInterval(Configuration.get().Mqtt.PublishInterval * TASK_SECOND);
     if (!Configuration.get().Vedirect.Enabled) {
         return;
     }

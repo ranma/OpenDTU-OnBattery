@@ -201,6 +201,7 @@ void HuaweiCanClass::init(Scheduler& scheduler, uint8_t huawei_miso, uint8_t hua
     scheduler.addTask(_loopTask);
     _loopTask.setCallback(std::bind(&HuaweiCanClass::loop, this));
     _loopTask.setIterations(TASK_FOREVER);
+    _loopTask.setInterval(10 * TASK_MILLISECOND);
     _loopTask.enable();
 
     this->updateSettings(huawei_miso, huawei_mosi, huawei_clk, huawei_irq, huawei_cs, huawei_power);

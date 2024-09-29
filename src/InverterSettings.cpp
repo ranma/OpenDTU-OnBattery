@@ -14,7 +14,7 @@ InverterSettingsClass InverterSettings;
 
 InverterSettingsClass::InverterSettingsClass()
     : _settingsTask(INVERTER_UPDATE_SETTINGS_INTERVAL, TASK_FOREVER, std::bind(&InverterSettingsClass::settingsLoop, this))
-    , _hoyTask(TASK_IMMEDIATE, TASK_FOREVER, std::bind(&InverterSettingsClass::hoyLoop, this))
+    , _hoyTask(10 * TASK_MILLISECOND, TASK_FOREVER, std::bind(&InverterSettingsClass::hoyLoop, this))
 {
 }
 

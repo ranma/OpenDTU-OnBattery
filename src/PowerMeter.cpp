@@ -15,6 +15,7 @@ void PowerMeterClass::init(Scheduler& scheduler)
     scheduler.addTask(_loopTask);
     _loopTask.setCallback(std::bind(&PowerMeterClass::loop, this));
     _loopTask.setIterations(TASK_FOREVER);
+    _loopTask.setInterval(100 * TASK_MILLISECOND);
     _loopTask.enable();
 
     updateSettings();

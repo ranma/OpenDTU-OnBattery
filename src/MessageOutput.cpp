@@ -9,7 +9,7 @@
 MessageOutputClass MessageOutput;
 
 MessageOutputClass::MessageOutputClass()
-    : _loopTask(TASK_IMMEDIATE, TASK_FOREVER, std::bind(&MessageOutputClass::loop, this))
+    : _loopTask(1 * TASK_MILLISECOND, TASK_FOREVER, std::bind(&MessageOutputClass::loop, this))
 {
 }
 
@@ -47,6 +47,7 @@ size_t MessageOutputClass::write(uint8_t c)
     auto iter = res.first;
     auto& message = iter->second;
 
+    _condition.signal();
     message.push_back(c);
 
     if (c == '\n') {
@@ -71,6 +72,7 @@ size_t MessageOutputClass::write(const uint8_t *buffer, size_t size)
     for (size_t idx = 0; idx < size; ++idx) {
         uint8_t c = buffer[idx];
 
+        _condition.signal();
         message.push_back(c);
 
         if (c == '\n') {
@@ -88,6 +90,8 @@ size_t MessageOutputClass::write(const uint8_t *buffer, size_t size)
 
 void MessageOutputClass::loop()
 {
+    _condition.setWaiting(1);
+    _loopTask.waitFor(&_condition);
     std::lock_guard<std::mutex> lock(_msgLock);
 
     // clean up (possibly filled) buffers of deleted tasks

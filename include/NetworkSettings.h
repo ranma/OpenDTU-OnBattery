@@ -66,6 +66,7 @@ private:
     void NetworkEvent(const WiFiEvent_t event, WiFiEventInfo_t info);
 
     Task _loopTask;
+    StatusRequest _condition;
 
     static constexpr byte DNS_PORT = 53;
 

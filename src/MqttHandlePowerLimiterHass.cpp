@@ -18,11 +18,13 @@ void MqttHandlePowerLimiterHassClass::init(Scheduler& scheduler)
     scheduler.addTask(_loopTask);
     _loopTask.setCallback(std::bind(&MqttHandlePowerLimiterHassClass::loop, this));
     _loopTask.setIterations(TASK_FOREVER);
+    _loopTask.setInterval(Configuration.get().Mqtt.PublishInterval * TASK_SECOND);
     _loopTask.enable();
 }
 
 void MqttHandlePowerLimiterHassClass::loop()
 {
+    _loopTask.setInterval(Configuration.get().Mqtt.PublishInterval * TASK_SECOND);
     if (!Configuration.get().PowerLimiter.Enabled) {
         return;
     }

@@ -19,6 +19,7 @@ void MqttHandleVedirectClass::init(Scheduler& scheduler)
     scheduler.addTask(_loopTask);
     _loopTask.setCallback([this] { loop(); });
     _loopTask.setIterations(TASK_FOREVER);
+    _loopTask.setInterval(Configuration.get().Mqtt.PublishInterval * TASK_SECOND);
     _loopTask.enable();
 
     // initially force a full publish
@@ -35,6 +36,7 @@ void MqttHandleVedirectClass::forceUpdate()
 
 void MqttHandleVedirectClass::loop()
 {
+    _loopTask.setInterval(Configuration.get().Mqtt.PublishInterval * TASK_SECOND);
     CONFIG_T& config = Configuration.get();
 
     if (!MqttSettings.getConnected() || !config.Vedirect.Enabled) {

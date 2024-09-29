@@ -12,6 +12,7 @@ void VictronMpptClass::init(Scheduler& scheduler)
     scheduler.addTask(_loopTask);
     _loopTask.setCallback([this] { loop(); });
     _loopTask.setIterations(TASK_FOREVER);
+    _loopTask.setInterval(10 * TASK_MILLISECOND);
     _loopTask.enable();
 
     this->updateSettings();

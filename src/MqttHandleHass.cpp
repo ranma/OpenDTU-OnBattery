@@ -20,11 +20,13 @@ MqttHandleHassClass::MqttHandleHassClass()
 void MqttHandleHassClass::init(Scheduler& scheduler)
 {
     scheduler.addTask(_loopTask);
+    _loopTask.setInterval(Configuration.get().Mqtt.PublishInterval * TASK_SECOND);
     _loopTask.enable();
 }
 
 void MqttHandleHassClass::loop()
 {
+    _loopTask.setInterval(Configuration.get().Mqtt.PublishInterval * TASK_SECOND);
     if (_updateForced) {
         publishConfig();
         _updateForced = false;

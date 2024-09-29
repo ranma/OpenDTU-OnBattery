@@ -8,6 +8,7 @@
 #include "NetworkSettings.h"
 #include <Hoymiles.h>
 #include <CpuTemperature.h>
+#include <Scheduler.h>
 
 MqttHandleDtuClass MqttHandleDtu;
 
@@ -47,5 +48,17 @@ void MqttHandleDtuClass::loop()
     float temperature = CpuTemperature.read();
     if (!std::isnan(temperature)) {
         MqttSettings.publish("dtu/temperature", String(temperature));
+    }
+
+    float cpuTotal = scheduler.getCpuLoadTotal();
+    if (cpuTotal > 0) {
+      float cpuIdle = scheduler.getCpuLoadIdle() / cpuTotal;
+      float cpuCycle = scheduler.getCpuLoadCycle() / cpuTotal;
+      float cpuActive = 1.0 - cpuIdle - cpuCycle;
+      scheduler.cpuLoadReset();
+
+      MqttSettings.publish("dtu/scheduler/idle", String(cpuIdle));
+      MqttSettings.publish("dtu/scheduler/cycle", String(cpuCycle));
+      MqttSettings.publish("dtu/scheduler/active", String(cpuActive));
     }
 }
