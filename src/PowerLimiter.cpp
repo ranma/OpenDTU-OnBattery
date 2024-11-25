@@ -177,14 +177,6 @@ void PowerLimiterClass::loop()
         return announceStatus(Status::InverterInvalid);
     }
 
-    if (Mode::UnconditionalFullSolarPassthrough == _mode) {
-        return fullSolarPassthrough(Status::UnconditionalSolarPassthrough);
-    }
-
-    if (isFullSolarPassthroughActive()) {
-        return fullSolarPassthrough(Status::FullSolarPassthrough);
-    }
-
     uint32_t latestInverterStats = 0;
 
     for (auto const& upInv : _inverters) {
@@ -194,6 +186,14 @@ void PowerLimiterClass::loop()
         }
 
         latestInverterStats = std::max(*oStatsMillis, latestInverterStats);
+    }
+
+    if (Mode::UnconditionalFullSolarPassthrough == _mode) {
+        return fullSolarPassthrough(Status::UnconditionalSolarPassthrough);
+    }
+
+    if (isFullSolarPassthroughActive()) {
+        return fullSolarPassthrough(Status::FullSolarPassthrough);
     }
 
     // if the power meter is being used, i.e., if its data is valid, we want to
