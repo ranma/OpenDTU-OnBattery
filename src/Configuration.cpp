@@ -485,13 +485,6 @@ bool ConfigurationClass::read()
     File f = LittleFS.open(CONFIG_FILENAME, "r", false);
     Utils::skipBom(f);
 
-    // skip Byte Order Mask (BOM). valid JSON docs always start with '{' or '['.
-    while (f.available() > 0) {
-        int c = f.peek();
-        if (c == '{' || c == '[') { break; }
-        f.read();
-    }
-
     JsonDocument doc;
 
     // Deserialize the JSON document
