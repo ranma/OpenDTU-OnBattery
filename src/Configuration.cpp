@@ -130,7 +130,7 @@ void ConfigurationClass::serializePowerLimiterConfig(PowerLimiterConfig const& s
     target["enabled"] = source.Enabled;
     target["verbose_logging"] = source.VerboseLogging;
     target["solar_passthrough_enabled"] = source.SolarPassThroughEnabled;
-    target["solar_passthrough_losses"] = source.SolarPassThroughLosses;
+    target["conduction_losses"] = source.ConductionLosses;
     target["battery_always_use_at_night"] = source.BatteryAlwaysUseAtNight;
     target["target_power_consumption"] = source.TargetPowerConsumption;
     target["target_power_consumption_hysteresis"] = source.TargetPowerConsumptionHysteresis;
@@ -441,7 +441,7 @@ void ConfigurationClass::deserializePowerLimiterConfig(JsonObject const& source,
     target.Enabled = source["enabled"] | POWERLIMITER_ENABLED;
     target.VerboseLogging = source["verbose_logging"] | VERBOSE_LOGGING;
     target.SolarPassThroughEnabled = source["solar_passthrough_enabled"] | POWERLIMITER_SOLAR_PASSTHROUGH_ENABLED;
-    target.SolarPassThroughLosses = source["solar_passthrough_losses"] | POWERLIMITER_SOLAR_PASSTHROUGH_LOSSES;
+    target.ConductionLosses = source["conduction_losses"] | POWERLIMITER_CONDUCTION_LOSSES;
     target.BatteryAlwaysUseAtNight = source["battery_always_use_at_night"] | POWERLIMITER_BATTERY_ALWAYS_USE_AT_NIGHT;
     target.TargetPowerConsumption = source["target_power_consumption"] | POWERLIMITER_TARGET_POWER_CONSUMPTION;
     target.TargetPowerConsumptionHysteresis = source["target_power_consumption_hysteresis"] | POWERLIMITER_TARGET_POWER_CONSUMPTION_HYSTERESIS;
@@ -868,7 +868,7 @@ void ConfigurationClass::migrateOnBattery()
         }
 
         if (!powerlimiter["solar_passtrough_losses"].isNull()) {
-            config.PowerLimiter.SolarPassThroughLosses = powerlimiter["solar_passtrough_losses"].as<uint8_t>();
+            config.PowerLimiter.ConductionLosses = powerlimiter["solar_passtrough_losses"].as<uint8_t>();
         }
 
         if (!powerlimiter["inverter_id"].isNull()) {
@@ -893,6 +893,10 @@ void ConfigurationClass::migrateOnBattery()
 
             config.PowerLimiter.Inverters[1].Serial = 0;
         }
+    }
+
+    if (config.Cfg.VersionOnBattery < 2) {
+        config.PowerLimiter.ConductionLosses = doc["powerlimiter"]["solar_passthrough_losses"].as<uint8_t>();
     }
 
     f.close();
