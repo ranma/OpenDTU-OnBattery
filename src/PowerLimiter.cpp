@@ -259,6 +259,9 @@ void PowerLimiterClass::loop()
 
     _batteryDischargeEnabled = getBatteryPower();
 
+    // re-calculate load-corrected voltage once (and only once) per DPL loop
+    _oLoadCorrectedVoltage = std::nullopt;
+
     if (_verboseLogging && usesBatteryPoweredInverter()) {
         MessageOutput.printf("[DPL] battery interface %sabled, SoC %.1f %% (%s), age %u s (%s)\r\n",
                 (config.Battery.Enabled?"en":"dis"),
@@ -720,6 +723,8 @@ std::optional<uint16_t> PowerLimiterClass::getBatteryDischargeLimit()
 
 float PowerLimiterClass::getLoadCorrectedVoltage()
 {
+    if (_oLoadCorrectedVoltage) { return *_oLoadCorrectedVoltage; }
+
     auto const& config = Configuration.get();
 
     // TODO(schlimmchen): use the battery's data if available,
@@ -731,7 +736,9 @@ float PowerLimiterClass::getLoadCorrectedVoltage()
         return 0.0;
     }
 
-    return dcVoltage + (acPower * config.PowerLimiter.VoltageLoadCorrectionFactor);
+    _oLoadCorrectedVoltage = dcVoltage + (acPower * config.PowerLimiter.VoltageLoadCorrectionFactor);
+
+    return *_oLoadCorrectedVoltage;
 }
 
 bool PowerLimiterClass::testThreshold(float socThreshold, float voltThreshold,
