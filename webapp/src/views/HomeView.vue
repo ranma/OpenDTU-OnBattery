@@ -10,6 +10,7 @@
         <HintView :hints="liveData.hints" />
         <InverterTotalInfo
             :totalData="liveData.total"
+            :hasInverters="hasInverters"
             :totalVeData="liveData.vedirect"
             :totalBattData="liveData.battery"
             :powerMeterData="liveData.power_meter"
@@ -671,6 +672,9 @@ export default defineComponent({
             return this.liveData.inverters.slice().sort((a: Inverter, b: Inverter) => {
                 return a.order - b.order;
             });
+        },
+        hasInverters(): boolean {
+            return this.liveData?.inverters?.length > 0 || false;
         },
     },
     methods: {
