@@ -684,6 +684,7 @@
         "TargetPowerConsumptionHysteresisHint": "Only send a newly calculated power limit to the respective inverter if the absolute difference to the last reported power limit exceeds this amount.",
         "LowerPowerLimit": "Minimum Power Limit",
         "LowerPowerLimitHint": "This value must be selected so that stable operation is possible at this limit. If the inverter could only be operated with a lower limit, it is put into standby instead if it is battery-powered.",
+        "LowerPowerLimitWarning": "The selected value for the minimum power limit is lower than the recommended minimum value of {min} W. If the inverter is operated at the selected value, it may oscillate and shut down automatically.",
         "BaseLoadLimit": "Base Load",
         "BaseLoadLimitHint": "Relevant for operation without power meter or when the power meter fails. As long as the other conditions allow (battery charge in particular), the inverters are configured to output this amount of power in total.",
         "TotalUpperPowerLimit": "Maximum Total Output",
