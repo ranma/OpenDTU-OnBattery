@@ -534,7 +534,13 @@ export default defineComponent({
                     ) {
                         continue;
                     }
-                    if (!(inv.poll_enable && inv.command_enable && inv.poll_enable_night && inv.command_enable_night)) {
+                    const commEnabled =
+                        inv.poll_enable && inv.command_enable && inv.poll_enable_night && inv.command_enable_night;
+                    const governed = this.governedInverters.some(
+                        (cfgInv: PowerLimiterInverterConfig) => cfgInv.serial === inv.serial
+                    );
+
+                    if (governed && !commEnabled) {
                         hints.push({ severity: 'requirement', subject: 'InverterCommunication' });
                         break;
                     }
