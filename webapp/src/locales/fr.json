@@ -343,6 +343,13 @@
         "NotConfigured": "non configurée",
         "Unknown": "Inconnue"
     },
+    "uartallocations": {
+        "Allocations": "Serial Hardware Interface Allocations",
+        "Owner": "Component",
+        "Port": "Allocated Port",
+        "Free": "(Still Available)",
+        "Rejected": "No UART available"
+    },
     "networkinfo": {
         "NetworkInformation": "Informations sur le réseau"
     },

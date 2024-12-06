@@ -326,6 +326,13 @@
         "NotConfigured": "nicht konfiguriert",
         "Unknown": "unbekannt"
     },
+    "uartallocations": {
+        "Allocations": "Zuteilung Serieller Hardwareschnittstellen",
+        "Owner": "Komponente",
+        "Port": "Zugeteilte Schnittstelle",
+        "Free": "(Noch Verfügbar)",
+        "Rejected": "Keine Schnittstelle verfügbar"
+    },
     "networkinfo": {
         "NetworkInformation": "Netzwerkinformationen"
     },
