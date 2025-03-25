@@ -71,10 +71,9 @@ void Provider::loop()
 
         if(upController->isDataValid()) {
             _stats->update(upController->getData().serialNr_SER, upController->getData(), upController->getLastUpdate());
-        } else {
-            _stats->update(upController->getData().serialNr_SER, std::nullopt, upController->getLastUpdate());
         }
     }
+    _stats->cleanStaleEntries();  // Expire old entries.
 }
 
 } // namespace SolarChargers::Victron

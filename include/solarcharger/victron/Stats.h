@@ -24,11 +24,12 @@ public:
     void mqttPublish() const final;
     void mqttPublishSensors(const boolean forcePublish) const final;
 
-    void update(const String serial, const std::optional<VeDirectMpptController::data_t> mpptData, uint32_t lastUpdate) const;
+    void update(const String serial, const VeDirectMpptController::data_t& mpptData, uint32_t lastUpdate) const;
+    void cleanStaleEntries();
 
 private:
     // TODO(andreasboehm): _data and _lastUpdate in two different structures is not ideal and needs to change
-    mutable std::map<String, std::optional<VeDirectMpptController::data_t>> _data;
+    mutable std::map<String, VeDirectMpptController::data_t> _data;
     mutable std::map<String, uint32_t> _lastUpdate;
 
     mutable std::map<String, VeDirectMpptController::data_t> _previousData;

@@ -6,7 +6,10 @@
 
 namespace SolarChargers::Victron {
 
-void Stats::update(const String serial, const std::optional<VeDirectMpptController::data_t> mpptData, uint32_t lastUpdate) const
+// Same max age as in VeDirectFrameHandler<T>::isDataValid()
+const uint32_t maxDataAgeMillis = 10 * 1000;  // Ten seconds.
+
+void Stats::update(const String serial, const VeDirectMpptController::data_t& mpptData, uint32_t lastUpdate) const
 {
     // serial required as index
     if (serial.isEmpty()) { return; }
@@ -15,13 +18,27 @@ void Stats::update(const String serial, const std::optional<VeDirectMpptControll
     _lastUpdate[serial] = lastUpdate;
 }
 
+void Stats::cleanStaleEntries()
+{
+    auto const now = millis();
+    auto iter = _lastUpdate.cbegin();
+    while (iter != _lastUpdate.cend()) {
+        auto staleNess = now - iter->second;
+        if (staleNess < maxDataAgeMillis) { ++iter; continue; }
+
+        // Delete the data itself (easy).
+        _data.erase(iter->first);
+        // And the update timestamp (while iterating over it).
+        iter = _lastUpdate.erase(iter);
+    }
+}
+
 uint32_t Stats::getAgeMillis() const
 {
     uint32_t age = 0;
     auto now = millis();
 
     for (auto const& entry : _data) {
-        if (!entry.second) { continue; }
         if (!_lastUpdate[entry.first]) { continue; }
 
         age = std::max<uint32_t>(age, now - _lastUpdate[entry.first]);
@@ -36,10 +53,8 @@ std::optional<float> Stats::getOutputPowerWatts() const
     std::optional<float> sum = std::nullopt;
 
     for (auto const& entry : _data) {
-        if (!entry.second) { continue; }
-
         // NOTE: batteryOutputPower_W can be negative if the load output is in use
-        sum = sum.value_or(0) + std::max<int16_t>(0, entry.second->batteryOutputPower_W);
+        sum = sum.value_or(0) + std::max<int16_t>(0, entry.second.batteryOutputPower_W);
     }
 
     return sum;
@@ -50,9 +65,7 @@ std::optional<float> Stats::getOutputVoltage() const
     std::optional<float> min = std::nullopt;
 
     for (auto const& entry : _data) {
-        if (!entry.second) { continue; }
-
-        float volts = entry.second->batteryVoltage_V_mV / 1000.0;
+        float volts = entry.second.batteryVoltage_V_mV / 1000.0;
         min = min.has_value() ? std::min(*min, volts) : volts;
     }
 
@@ -64,17 +77,15 @@ std::optional<uint16_t> Stats::getPanelPowerWatts() const
     std::optional<float> sum = std::nullopt;
 
     for (auto const& entry : _data) {
-        if (!entry.second) { continue; }
-
         // if any charge controller is part of a VE.Smart network, and if the
         // charge controller is connected in a way that allows to send
         // requests, we should have the "network total DC input power" available.
-        auto networkPower = entry.second->NetworkTotalDcInputPowerMilliWatts;
+        auto networkPower = entry.second.NetworkTotalDcInputPowerMilliWatts;
         if (networkPower.first > 0) {
             return static_cast<uint16_t>(networkPower.second / 1000.0);
         }
 
-        sum = sum.has_value() ? *sum + entry.second->panelPower_PPV_W : entry.second->panelPower_PPV_W;
+        sum = sum.has_value() ? *sum + entry.second.panelPower_PPV_W : entry.second.panelPower_PPV_W;
     }
 
     return sum;
@@ -85,9 +96,7 @@ std::optional<float> Stats::getYieldTotal() const
     std::optional<float> sum = std::nullopt;
 
     for (auto const& entry : _data) {
-        if (!entry.second) { continue; }
-
-        float yield = entry.second->yieldTotal_H19_Wh / 1000.0;
+        float yield = entry.second.yieldTotal_H19_Wh / 1000.0;
         sum = sum.has_value() ? *sum + yield : yield;
     }
 
@@ -99,9 +108,7 @@ std::optional<float> Stats::getYieldDay() const
     std::optional<float> sum = std::nullopt;
 
     for (auto const& entry : _data) {
-        if (!entry.second) { continue; }
-
-        sum = sum.has_value() ? *sum + entry.second->yieldToday_H20_Wh : entry.second->yieldToday_H20_Wh;
+        sum = sum.has_value() ? *sum + entry.second.yieldToday_H20_Wh : entry.second.yieldToday_H20_Wh;
     }
 
     return sum;
@@ -110,9 +117,8 @@ std::optional<float> Stats::getYieldDay() const
 std::optional<Stats::StateOfOperation> Stats::getStateOfOperation() const
 {
     for (auto const& entry : _data) {
-        if (!entry.second) { continue; }
         // see victron protocol documentation for CS values
-        switch (entry.second->currentState_CS) {
+        switch (entry.second.currentState_CS) {
             case 0: return Stats::StateOfOperation::Off;
             case 3: return Stats::StateOfOperation::Bulk;
             case 4: return Stats::StateOfOperation::Absorption;
@@ -126,8 +132,7 @@ std::optional<Stats::StateOfOperation> Stats::getStateOfOperation() const
 std::optional<float> Stats::getFloatVoltage() const
 {
     for (auto const& entry : _data) {
-        if (!entry.second) { continue; }
-        auto voltage = entry.second->BatteryFloatMilliVolt;
+        auto voltage = entry.second.BatteryFloatMilliVolt;
         if (voltage.first > 0) { // only return valid and not outdated value
             return voltage.second / 1000.0;
         }
@@ -138,8 +143,7 @@ std::optional<float> Stats::getFloatVoltage() const
 std::optional<float> Stats::getAbsorptionVoltage() const
 {
     for (auto const& entry : _data) {
-        if (!entry.second) { continue; }
-        auto voltage = entry.second->BatteryAbsorptionMilliVolt;
+        auto voltage = entry.second.BatteryAbsorptionMilliVolt;
         if (voltage.first > 0) { // only return valid and not outdated value
             return voltage.second / 1000.0;
         }
@@ -154,8 +158,6 @@ void Stats::getLiveViewData(JsonVariant& root, const boolean fullUpdate, const u
     auto instances = root["solarcharger"]["instances"].to<JsonObject>();
 
     for (auto const& entry : _data) {
-        if (!entry.second) { continue; }
-
         auto age = 0;
         if (_lastUpdate[entry.first]) {
             age = millis() - _lastUpdate[entry.first];
@@ -167,7 +169,7 @@ void Stats::getLiveViewData(JsonVariant& root, const boolean fullUpdate, const u
         JsonObject instance = instances[entry.first].to<JsonObject>();
         instance["data_age_ms"] = age;
         instance["hide_serial"] = false;
-        populateJsonWithInstanceStats(instance, *entry.second);
+        populateJsonWithInstanceStats(instance, entry.second);
     }
 }
 
@@ -298,13 +300,12 @@ void Stats::mqttPublish() const
 
         for (auto const& entry : _data) {
             auto currentData = entry.second;
-            if (!currentData) { continue; }
 
             auto const& previousData = _previousData[entry.first];
-            publishMpptData(*currentData, previousData);
+            publishMpptData(currentData, previousData);
 
             if (!_PublishFull) {
-                _previousData[entry.first] = *currentData;
+                _previousData[entry.first] = currentData;
             }
         }
 
@@ -387,8 +388,7 @@ void Stats::mqttPublishSensors(const boolean forcePublish) const
     if (!forcePublish) { return; }
 
     for (auto entry : _data) {
-        if (!entry.second) { continue; }
-        _hassIntegration.publishSensors(*entry.second);
+        _hassIntegration.publishSensors(entry.second);
     }
 }
 
