@@ -11,6 +11,24 @@ void Stats::update(const String serial, const std::optional<VeDirectMpptControll
     // serial required as index
     if (serial.isEmpty()) { return; }
 
+    // expire stale entries
+    auto const maxAge = 60 * 1000;  // One minute
+    auto const now = millis();
+
+    // Use const iterator so we can delete entries while iterating.
+    for (auto it = _lastUpdate.cbegin(); it != _lastUpdate.cend();) {
+        auto staleNess = now - it->second;
+        if (staleNess < maxAge) { it = std::next(it); continue; }
+
+        MessageOutput.printf("[VicronStats] erasing stale entries for: %s\r\n", it->first.c_str());
+        _data.erase(it->first);
+        it = _lastUpdate.erase(it);
+    }
+
+    auto staleNess = now - lastUpdate;
+    if (staleNess >= maxAge) {
+        return;
+    }
     _data[serial] = mpptData;
     _lastUpdate[serial] = lastUpdate;
 }
@@ -37,7 +55,6 @@ std::optional<float> Stats::getOutputPowerWatts() const
 
     for (auto const& entry : _data) {
         if (!entry.second) { continue; }
-
         // NOTE: batteryOutputPower_W can be negative if the load output is in use
         sum = sum.value_or(0) + std::max<int16_t>(0, entry.second->batteryOutputPower_W);
     }
