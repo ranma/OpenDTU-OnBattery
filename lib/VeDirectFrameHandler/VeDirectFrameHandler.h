@@ -70,6 +70,7 @@ private:
     State hexRxEvent(uint8_t inbyte);
 
     uint8_t _checksum;                         // checksum value
+    bool _invalidChar;                         // invalid character received
     char * _textPointer;                       // pointer to the private buffer we're writing to, name or value
     int _hexSize;                              // length of hex buffer
     char _hexBuffer[VE_MAX_HEX_LEN];           // buffer for received hex frames

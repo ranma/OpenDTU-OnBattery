@@ -52,6 +52,7 @@ VeDirectFrameHandler<T>::VeDirectFrameHandler() :
 	_lastUpdate(0),
 	_state(State::IDLE),
 	_checksum(0),
+	_invalidChar(false),
 	_textPointer(0),
 	_hexSize(0),
 	_name(""),
@@ -95,6 +96,7 @@ template<typename T>
 void VeDirectFrameHandler<T>::reset()
 {
 	_checksum = 0;
+	_invalidChar = false;
 	_state = State::IDLE;
 	_textData.clear();
 }
@@ -150,12 +152,6 @@ void VeDirectFrameHandler<T>::rxData(uint8_t inbyte)
 			_msgOut->printf("%s ERROR: debug buffer overrun!\r\n", _logId);
 		}
 	}
-	if (_state != State::CHECKSUM && !isValidChar(inbyte)) {
-		_msgOut->printf("%s non-ASCII character 0x%02x, invalid frame\r\n", _logId, inbyte);
-		reset();
-		return;
-	}
-
 	if ( (inbyte == ':') && (_state != State::CHECKSUM) ) {
 		_prevState = _state; //hex frame can interrupt TEXT
 		_state = State::RECORD_HEX;
@@ -163,6 +159,9 @@ void VeDirectFrameHandler<T>::rxData(uint8_t inbyte)
 	}
 	if (_state != State::RECORD_HEX) {
 		_checksum += inbyte;
+		if (_state != State::CHECKSUM && !isValidChar(inbyte)) {
+			_invalidChar = true;
+		}
 	}
 	inbyte = toupper(inbyte);
 
@@ -229,7 +228,7 @@ void VeDirectFrameHandler<T>::rxData(uint8_t inbyte)
 	case State::CHECKSUM:
 	{
 		if (_verboseLogging) { dumpDebugBuffer(); }
-		if (_checksum == 0) {
+		if (_checksum == 0 && !_invalidChar) {
 			for (auto const& event : _textData) {
 				processTextData(event.first, event.second);
 			}
@@ -237,7 +236,11 @@ void VeDirectFrameHandler<T>::rxData(uint8_t inbyte)
 			frameValidEvent();
 		}
 		else {
-			_msgOut->printf("%s checksum 0x%02x != 0x00, invalid frame\r\n", _logId, _checksum);
+			if (_checksum != 0) {
+				_msgOut->printf("%s checksum 0x%02x != 0x00, invalid frame\r\n", _logId, _checksum);
+			} else {
+				_msgOut->printf("%s non-ASCII character received, invalid frame\r\n", _logId);
+			}
 		}
 		reset();
 		break;
