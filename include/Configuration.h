@@ -271,6 +271,7 @@ struct SOLAR_CHARGER_CONFIG_T {
     bool Enabled;
     bool VerboseLogging;
     bool PublishUpdatesOnly;
+    bool ForwardBatteryData;
     SolarChargerProviderType Provider;
     SolarChargerMqttConfig Mqtt;
 };

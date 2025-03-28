@@ -13,6 +13,7 @@ public:
     void mqttPublish() const final;
     bool getImmediateChargingRequest() const { return _chargeImmediately; };
     float getChargeCurrentLimitation() const { return _chargeCurrentLimit; };
+    std::optional<float> getTemperature() const final { if (_lastUpdate) return _temperature; else return std::nullopt; }
 
 private:
     void setLastUpdate(uint32_t ts) { _lastUpdate = ts; }

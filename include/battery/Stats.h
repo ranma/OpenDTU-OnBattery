@@ -32,6 +32,8 @@ public:
     float getDischargeCurrentLimit() const { return _dischargeCurrentLimit; };
     uint32_t getDischargeCurrentLimitAgeSeconds() const { return (millis() - _lastUpdateDischargeCurrentLimit) / 1000; }
 
+    virtual std::optional<float> getTemperature() const { return std::nullopt; }
+
     // convert stats to JSON for web application live view
     virtual void getLiveViewData(JsonVariant& root) const;
 

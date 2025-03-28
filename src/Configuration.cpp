@@ -57,6 +57,7 @@ void ConfigurationClass::serializeSolarChargerConfig(SolarChargerConfig const& s
     target["verbose_logging"] = source.VerboseLogging;
     target["provider"] = source.Provider;
     target["publish_updates_only"] = source.PublishUpdatesOnly;
+    target["forward_battery_data"] = source.ForwardBatteryData;
 }
 
 void ConfigurationClass::serializeSolarChargerMqttConfig(SolarChargerMqttConfig const& source, JsonObject& target)
@@ -433,6 +434,7 @@ void ConfigurationClass::deserializeSolarChargerConfig(JsonObject const& source,
     target.VerboseLogging = source["verbose_logging"] | VERBOSE_LOGGING;
     target.Provider = source["provider"] | SolarChargerProviderType::VEDIRECT;
     target.PublishUpdatesOnly = source["publish_updates_only"] | SOLAR_CHARGER_PUBLISH_UPDATES_ONLY;
+    target.ForwardBatteryData = source["forward_battery_data"] | SOLAR_CHARGER_FORWARD_BATTERY_DATA;
 }
 
 void ConfigurationClass::deserializeSolarChargerMqttConfig(JsonObject const& source, SolarChargerMqttConfig& target)
